@@ -18,7 +18,7 @@ const (
 	StdWidth  = 240
 	StdHeight = 80
 	// Maximum absolute skew factor of a single digit.
-	maxSkew = 0.7
+	maxSkew = 0.0
 	// Number of background circles.
 	circleCount = 20
 )
@@ -58,11 +58,11 @@ func NewImage(id string, digits []byte, width, height int) *Image {
 		x += m.numWidth + m.dotSize
 	}
 	// Draw strike-through line.
-	m.strikeThrough()
+	// m.strikeThrough()
 	// Apply wave distortion.
-	m.distort(m.rng.Float(5, 10), m.rng.Float(100, 200))
+	// m.distort(m.rng.Float(5, 10), m.rng.Float(100, 200))
 	// Fill image with random circles.
-	m.fillWithCircles(circleCount, m.dotSize)
+	// m.fillWithCircles(circleCount, m.dotSize)
 	return m
 }
 
