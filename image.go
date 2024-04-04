@@ -55,7 +55,7 @@ func NewImage(id string, digits []byte, width, height int) *Image {
 	// Draw digits.
 	for _, n := range digits {
 		m.drawDigit(font[n], x, y)
-		x += m.numWidth + m.dotSize
+		x += m.numWidth + m.dotSize*4
 	}
 	// Draw strike-through line.
 	// m.strikeThrough()
@@ -105,37 +105,37 @@ func (m *Image) calculateSizes(width, height, ncount int) {
 	// Goal: fit all digits inside the image.
 	var border int
 	if width > height {
-		border = height / 4
+		border = height / 4 // 40 / 4 = 10
 	} else {
-		border = width / 4
+		border = width / 4 // 40 / 4 = 10
 	}
 	// Convert everything to floats for calculations.
-	w := float64(width - border*2)
-	h := float64(height - border*2)
+	w := float64(width - border*2)  // 20
+	h := float64(height - border*2) // 20
 	// fw takes into account 1-dot spacing between digits.
-	fw := float64(fontWidth + 1)
-	fh := float64(fontHeight)
-	nc := float64(ncount)
+	fw := float64(fontWidth + 1) // 11 + 1 = 12
+	fh := float64(fontHeight)    // 18
+	nc := float64(ncount)        // 2
 	// Calculate the width of a single digit taking into account only the
 	// width of the image.
-	nw := w / nc
+	nw := w / nc // 20 / 2 = 10
 	// Calculate the height of a digit from this width.
-	nh := nw * fh / fw
+	nh := nw * fh / fw // 10 * 18 / 12 = 15
 	// Digit too high?
 	if nh > h {
 		// Fit digits based on height.
 		nh = h
-		nw = fw / fh * nh
+		nw = fw / fh * nh // 12 / 18 * 15 = 10
 	}
 	// Calculate dot size.
-	m.dotSize = int(nh / fh)
+	m.dotSize = int(nh / fh) // 15 / 18 = 0
 	if m.dotSize < 1 {
 		m.dotSize = 1
 	}
 	// Save everything, making the actual width smaller by 1 dot to account
 	// for spacing between digits.
-	m.numWidth = int(nw) - m.dotSize
-	m.numHeight = int(nh)
+	m.numWidth = int(nw) - m.dotSize // 10 - 1 = 9
+	m.numHeight = int(nh)            // 15
 }
 
 func (m *Image) drawHorizLine(fromX, toX, y int, colorIdx uint8) {
@@ -201,7 +201,7 @@ func (m *Image) strikeThrough() {
 func (m *Image) drawDigit(digit []byte, x, y int) {
 	skf := m.rng.Float(-maxSkew, maxSkew)
 	xs := float64(x)
-	r := m.dotSize / 2
+	r := m.dotSize * 2 / 2
 	y += m.rng.Int(-r, r)
 	for yo := 0; yo < fontHeight; yo++ {
 		for xo := 0; xo < fontWidth; xo++ {
