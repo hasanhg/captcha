@@ -70,17 +70,19 @@ func (m *Image) getRandomPalette() color.Palette {
 	p := make([]color.Color, circleCount+1)
 	// Transparent color.
 	p[0] = color.RGBA{0xFF, 0xFF, 0xFF, 0x00}
-	// Primary color.
+	// Primary color. (White)
 	prim := color.RGBA{
-		uint8(m.rng.Intn(129)),
-		uint8(m.rng.Intn(129)),
-		uint8(m.rng.Intn(129)),
+		0xFF, //uint8(m.rng.Intn(129)),
+		0xFF, //uint8(m.rng.Intn(129)),
+		0xFF, //uint8(m.rng.Intn(129)),
 		0xFF,
 	}
 	p[1] = prim
 	// Circle colors.
 	for i := 2; i <= circleCount; i++ {
-		p[i] = m.randomBrightness(prim, 255)
+		// Make all colors white.
+		p[i] = prim
+		//p[i] = m.randomBrightness(prim, 255)
 	}
 	return p
 }
