@@ -8,10 +8,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/hasanhg/captcha"
 	"io"
 	"log"
 	"os"
+
+	"github.com/hasanhg/captcha"
 )
 
 var (
@@ -46,7 +47,7 @@ func main() {
 	case *flagAudio:
 		w = captcha.NewAudio("", d, *flagLang)
 	case *flagImage:
-		w = captcha.NewImage("", d, *flagImgW, *flagImgH)
+		w = captcha.NewImage("", d, *flagImgW, *flagImgH, nil, false)
 	}
 	_, err = w.WriteTo(f)
 	if err != nil {

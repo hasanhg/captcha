@@ -6,6 +6,7 @@ package captcha
 
 import (
 	"bytes"
+	"image/color"
 	"net/http"
 	"path"
 	"strings"
@@ -13,8 +14,24 @@ import (
 )
 
 type captchaHandler struct {
-	imgWidth  int
-	imgHeight int
+	imgWidth     int
+	imgHeight    int
+	primaryColor *color.RGBA
+	noBrightness bool
+}
+
+type captchaHandlerOption func(*captchaHandler)
+
+func WithPrimaryColor(c *color.RGBA) captchaHandlerOption {
+	return func(h *captchaHandler) {
+		h.primaryColor = c
+	}
+}
+
+func WithNoBrightness() captchaHandlerOption {
+	return func(h *captchaHandler) {
+		h.noBrightness = true
+	}
 }
 
 // Server returns a handler that serves HTTP requests with image or
@@ -39,8 +56,12 @@ type captchaHandler struct {
 // By default, the Server serves audio in English language. To serve audio
 // captcha in one of the other supported languages, append "lang" value, for
 // example, "?lang=ru".
-func Server(imgWidth, imgHeight int) http.Handler {
-	return &captchaHandler{imgWidth, imgHeight}
+func Server(imgWidth, imgHeight int, options ...captchaHandlerOption) http.Handler {
+	h := &captchaHandler{imgWidth, imgHeight, nil, false}
+	for _, option := range options {
+		option(h)
+	}
+	return h
 }
 
 func (h *captchaHandler) serve(w http.ResponseWriter, r *http.Request, id, ext, lang string, download bool) error {
@@ -52,7 +73,7 @@ func (h *captchaHandler) serve(w http.ResponseWriter, r *http.Request, id, ext, 
 	switch ext {
 	case ".png":
 		w.Header().Set("Content-Type", "image/png")
-		WriteImage(&content, id, h.imgWidth, h.imgHeight)
+		WriteImage(&content, id, h.imgWidth, h.imgHeight, h.primaryColor, h.noBrightness)
 	case ".wav":
 		w.Header().Set("Content-Type", "audio/x-wav")
 		WriteAudio(&content, id, lang)

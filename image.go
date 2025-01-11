@@ -33,13 +33,13 @@ type Image struct {
 
 // NewImage returns a new captcha image of the given width and height with the
 // given digits, where each digit must be in range 0-9.
-func NewImage(id string, digits []byte, width, height int) *Image {
+func NewImage(id string, digits []byte, width, height int, primaryColor *color.RGBA, noBrightness bool) *Image {
 	m := new(Image)
 
 	// Initialize PRNG.
 	m.rng.Seed(deriveSeed(imageSeedPurpose, id, digits))
 
-	m.Paletted = image.NewPaletted(image.Rect(0, 0, width, height), m.getRandomPalette())
+	m.Paletted = image.NewPaletted(image.Rect(0, 0, width, height), m.getRandomPalette(primaryColor, noBrightness))
 	m.calculateSizes(width, height, len(digits))
 	// Randomly position captcha inside the image.
 	maxx := width - (m.numWidth+m.dotSize)*len(digits) - m.dotSize
@@ -66,23 +66,36 @@ func NewImage(id string, digits []byte, width, height int) *Image {
 	return m
 }
 
-func (m *Image) getRandomPalette() color.Palette {
+func (m *Image) getRandomPalette(primaryColor *color.RGBA, noBrightness bool) color.Palette {
+	var (
+		prim color.RGBA
+	)
+
 	p := make([]color.Color, circleCount+1)
 	// Transparent color.
 	p[0] = color.RGBA{0xFF, 0xFF, 0xFF, 0x00}
-	// Primary color. (White)
-	prim := color.RGBA{
-		0xFF, //uint8(m.rng.Intn(129)),
-		0xFF, //uint8(m.rng.Intn(129)),
-		0xFF, //uint8(m.rng.Intn(129)),
-		0xFF,
+
+	// Primary color.
+	if primaryColor != nil {
+		prim = *primaryColor
+	} else {
+		prim = color.RGBA{
+			uint8(m.rng.Intn(129)),
+			uint8(m.rng.Intn(129)),
+			uint8(m.rng.Intn(129)),
+			0xFF,
+		}
 	}
+
 	p[1] = prim
 	// Circle colors.
 	for i := 2; i <= circleCount; i++ {
 		// Make all colors white.
-		p[i] = prim
-		//p[i] = m.randomBrightness(prim, 255)
+		if noBrightness {
+			p[i] = prim
+		} else {
+			p[i] = m.randomBrightness(prim, 255)
+		}
 	}
 	return p
 }
